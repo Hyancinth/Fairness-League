@@ -14,7 +14,7 @@ class HandLandmarkDetector:
             )
         self.landmarker = vision.HandLandmarker.create_from_options(options)
 
-        self.result = ""
+        self.result = None
     
     def detect(self, frame):
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

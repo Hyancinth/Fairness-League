@@ -1,10 +1,764 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Fairness League</title>
-    </head>
-    <body>
-        <h1>Test Video Stream</h1>
-        <img src = "{{url_for('video.video_feed')}}">
-    </body>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RPS Robot Showdown</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── CSS Variables ── */
+:root {
+  --bg:        #0f1b2d;
+  --panel:     #162236;
+  --panel2:    #1e3050;
+  --accent:    #00d4ff;
+  --accent2:   #ff6b6b;
+  --accent3:   #ffd93d;
+  --green:     #6bcb77;
+  --text:      #e8f4f8;
+  --muted:     #6a8aab;
+  --robot-body:#2a9fd6;
+  --robot-face:#1a6fa3;
+  --robot-eye: #00d4ff;
+  --radius:    16px;
+  --shadow:    0 8px 32px rgba(0,0,0,0.4);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(0,212,255,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(255,107,107,0.06) 0%, transparent 50%);
+}
+
+/* ── Header ── */
+header {
+  width: 100%;
+  text-align: center;
+  padding: 24px 16px 8px;
+}
+header h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(0,212,255,0.3));
+}
+header p { color: var(--muted); font-size: 0.95rem; margin-top: 4px; }
+
+/* ── Main Layout ── */
+main {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 20px;
+  width: 100%;
+  max-width: 1100px;
+  padding: 16px 20px 32px;
+  align-items: start;
+}
+
+/* ── Scoreboard ── */
+.scoreboard {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background: var(--panel);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.score-side {
+  flex: 1;
+  padding: 16px 24px;
+  text-align: center;
+}
+.score-side.player { background: linear-gradient(135deg, rgba(107,203,119,0.12), transparent); }
+.score-side.robot  { background: linear-gradient(135deg, transparent, rgba(255,107,107,0.12)); }
+.score-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--muted);
+}
+.score-val {
+  font-family: 'Fredoka One', cursive;
+  font-size: 3rem;
+  line-height: 1;
+  margin-top: 4px;
+}
+.score-side.player .score-val { color: var(--green); }
+.score-side.robot  .score-val { color: var(--accent2); }
+
+.score-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 24px;
+  border-left: 1px solid rgba(255,255,255,0.07);
+  border-right: 1px solid rgba(255,255,255,0.07);
+}
+.round-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); }
+.round-val {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.8rem;
+  color: var(--accent3);
+}
+
+/* ── Robot Panel ── */
+.robot-panel {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Robot SVG Face ── */
+.robot-wrap {
+  position: relative;
+  width: 200px;
+  height: 220px;
+}
+#robot-svg {
+  width: 200px;
+  height: 220px;
+  filter: drop-shadow(0 0 20px rgba(0,212,255,0.25));
+  transition: filter 0.4s;
+}
+#robot-svg.winning { filter: drop-shadow(0 0 30px rgba(107,203,119,0.5)); }
+#robot-svg.losing  { filter: drop-shadow(0 0 30px rgba(255,107,107,0.5)); }
+
+.robot-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+
+/* ── Emotion label ── */
+#emotion-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 4px 14px;
+  border-radius: 99px;
+  background: rgba(0,212,255,0.1);
+  border: 1px solid rgba(0,212,255,0.2);
+  color: var(--accent);
+  transition: all 0.4s;
+}
+
+/* ── Robot move display ── */
+#robot-move-display {
+  font-family: 'Fredoka One', cursive;
+  font-size: 3.5rem;
+  min-height: 60px;
+  transition: transform 0.3s;
+}
+
+/* ── Webcam ── */
+.cam-panel {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.cam-wrap {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 2px solid rgba(0,212,255,0.2);
+  box-shadow: var(--shadow);
+  background: #0a1520;
+  width: 100%;
+  aspect-ratio: 4/3;
+  max-width: 340px;
+}
+#webcam-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cam-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+#countdown-display {
+  font-family: 'Fredoka One', cursive;
+  font-size: 7rem;
+  color: white;
+  text-shadow: 0 0 30px var(--accent), 0 4px 16px rgba(0,0,0,0.8);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.15s, transform 0.15s;
+}
+#countdown-display.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+#gesture-label {
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  color: var(--accent3);
+  min-height: 1.4em;
+  text-transform: uppercase;
+}
+
+/* ── Result Panel ── */
+.result-panel {
+  grid-column: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+#result-banner {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.8rem;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  text-align: center;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  transition: all 0.4s;
+  background: var(--panel);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+#result-banner.win  { background: rgba(107,203,119,0.15); border-color: var(--green);   color: var(--green); }
+#result-banner.lose { background: rgba(255,107,107,0.15); border-color: var(--accent2); color: var(--accent2); }
+#result-banner.tie  { background: rgba(255,217,61,0.15);  border-color: var(--accent3); color: var(--accent3); }
+
+/* ── History ── */
+.history-panel {
+  width: 100%;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--panel);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: var(--shadow);
+}
+.history-panel::-webkit-scrollbar { width: 4px; }
+.history-panel::-webkit-scrollbar-thumb { background: var(--panel2); border-radius: 4px; }
+
+.history-header {
+  padding: 10px 16px 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+  z-index: 1;
+}
+.history-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  font-size: 0.85rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+.history-row:last-child { border-bottom: none; }
+.h-round { color: var(--muted); font-size: 0.75rem; width: 28px; flex-shrink: 0; }
+.h-move  { flex: 1; font-weight: 700; }
+.h-vs    { color: var(--muted); font-size: 0.75rem; }
+.h-robot { flex: 1; font-weight: 700; text-align: right; }
+.h-result { width: 48px; text-align: right; font-weight: 800; font-size: 0.8rem; }
+.h-result.win  { color: var(--green); }
+.h-result.lose { color: var(--accent2); }
+.h-result.tie  { color: var(--accent3); }
+
+/* ── Controls ── */
+.controls {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+button {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  border: none;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+button:active { transform: scale(0.96); }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+#play-btn {
+  background: linear-gradient(135deg, var(--accent), #0099cc);
+  color: #001a2c;
+  padding: 14px 36px;
+  font-size: 1.15rem;
+  box-shadow: 0 4px 20px rgba(0,212,255,0.3);
+}
+#play-btn:hover:not(:disabled) {
+  box-shadow: 0 6px 28px rgba(0,212,255,0.5);
+  transform: translateY(-2px);
+}
+
+#reset-btn {
+  background: var(--panel2);
+  color: var(--muted);
+  padding: 14px 28px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+#reset-btn:hover { background: var(--panel); color: var(--text); }
+
+/* ── Game Over Overlay ── */
+#gameover-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10,20,35,0.92);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+#gameover-overlay.show { display: flex; }
+
+.gameover-box {
+  background: var(--panel);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px;
+  padding: 48px 56px;
+  text-align: center;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+  animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  max-width: 420px;
+  width: 90%;
+}
+@keyframes popIn { from { opacity:0; transform:scale(0.7); } to { opacity:1; transform:scale(1); } }
+
+.gameover-emoji { font-size: 5rem; margin-bottom: 12px; }
+.gameover-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2.4rem;
+  margin-bottom: 8px;
+}
+.gameover-title.player-wins { color: var(--green); }
+.gameover-title.robot-wins  { color: var(--accent2); }
+.gameover-title.tie         { color: var(--accent3); }
+.gameover-scores {
+  font-size: 1.1rem;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+.gameover-scores span { color: var(--text); font-weight: 800; }
+
+#gameover-reset {
+  background: linear-gradient(135deg, var(--accent), #0099cc);
+  color: #001a2c;
+  padding: 14px 40px;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 20px rgba(0,212,255,0.3);
+}
+#gameover-reset:hover { box-shadow: 0 6px 28px rgba(0,212,255,0.5); transform: translateY(-2px); }
+
+/* ── Pulse animation for robot ── */
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+.robot-wrap.excited #robot-svg { animation: pulse 0.6s ease 3; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  main {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+  .scoreboard, .robot-panel, .cam-panel, .result-panel, .controls {
+    grid-column: 1;
+  }
+  .robot-panel { order: -1; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>✊ RPS ROBOT SHOWDOWN ✌️</h1>
+  <p>21 rounds • Can you outsmart the bot?</p>
+</header>
+
+<main>
+
+  <!-- Scoreboard -->
+  <div class="scoreboard">
+    <div class="score-side player">
+      <div class="score-label">You</div>
+      <div class="score-val" id="player-score">0</div>
+    </div>
+    <div class="score-divider">
+      <div class="round-label">Round</div>
+      <div class="round-val" id="round-display">1 / 21</div>
+    </div>
+    <div class="score-side robot">
+      <div class="score-label">R.O.B.</div>
+      <div class="score-val" id="robot-score">0</div>
+    </div>
+  </div>
+
+  <!-- Webcam -->
+  <div class="cam-panel">
+    <div class="cam-wrap">
+      <img id="webcam-img" alt="webcam" />
+      <div class="cam-overlay">
+        <div id="countdown-display">3</div>
+      </div>
+    </div>
+    <div id="gesture-label">— waiting —</div>
+  </div>
+
+  <!-- Robot -->
+  <div class="robot-panel">
+    <div class="robot-wrap" id="robot-wrap">
+      <!-- SVG robot face built via JS -->
+      <svg id="robot-svg" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+        <!-- Antenna -->
+        <line x1="100" y1="12" x2="100" y2="32" stroke="#2a9fd6" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="100" cy="9" r="7" fill="#00d4ff"/>
+        <!-- Head -->
+        <rect x="28" y="32" width="144" height="118" rx="24" ry="24" fill="#1e5f8a"/>
+        <rect x="34" y="38" width="132" height="106" rx="20" ry="20" fill="#2a7ab5"/>
+        <!-- Face plate -->
+        <rect x="42" y="50" width="116" height="82" rx="14" ry="14" fill="#1a6fa3"/>
+        <!-- Eyes -->
+        <g id="robot-eyes">
+          <circle cx="76" cy="84" r="16" fill="#0d2a3d"/>
+          <circle cx="76" cy="84" r="11" fill="#00d4ff" id="eye-l-inner"/>
+          <circle cx="71" cy="80" r="4" fill="white" opacity="0.6"/>
+          <circle cx="124" cy="84" r="16" fill="#0d2a3d"/>
+          <circle cx="124" cy="84" r="11" fill="#00d4ff" id="eye-r-inner"/>
+          <circle cx="119" cy="80" r="4" fill="white" opacity="0.6"/>
+        </g>
+        <!-- Mouth -->
+        <g id="robot-mouth"></g>
+        <!-- Cheek bolts -->
+        <circle cx="46" cy="100" r="5" fill="#1a5f8a"/>
+        <circle cx="154" cy="100" r="5" fill="#1a5f8a"/>
+        <!-- Neck -->
+        <rect x="80" y="150" width="40" height="18" rx="6" fill="#1e5f8a"/>
+        <!-- Body (partial) -->
+        <rect x="40" y="165" width="120" height="44" rx="16" fill="#1e5f8a"/>
+        <rect x="52" y="174" width="96" height="26" rx="10" fill="#2a7ab5"/>
+        <!-- Chest light -->
+        <circle cx="100" cy="187" r="8" fill="#00d4ff" opacity="0.8" id="chest-light"/>
+        <circle cx="78"  cy="187" r="5" fill="#ffd93d" opacity="0.6"/>
+        <circle cx="122" cy="187" r="5" fill="#ff6b6b" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="robot-name">R.O.B.</div>
+    <div id="emotion-badge">NEUTRAL</div>
+    <div id="robot-move-display"></div>
+  </div>
+
+  <!-- Result & History -->
+  <div class="result-panel">
+    <div id="result-banner">— —</div>
+    <div class="history-panel">
+      <div class="history-header">Round History</div>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button id="reset-btn">↺ New Game</button>
+    <button id="play-btn">▶ Play Round (3-2-1…)</button>
+  </div>
+
+</main>
+
+<!-- Game Over Overlay -->
+<div id="gameover-overlay">
+  <div class="gameover-box">
+    <div class="gameover-emoji" id="gameover-emoji">🏆</div>
+    <div class="gameover-title" id="gameover-title">You Win!</div>
+    <div class="gameover-scores" id="gameover-scores"></div>
+    <button id="gameover-reset">Play Again</button>
+  </div>
+</div>
+
+<script>
+// ── Emoji maps ────────────────────────────────────────────────────────────────
+const MOVE_EMOJI = { rock:"✊", paper:"✋", scissors:"✌️" };
+
+// ── Robot face rendering ──────────────────────────────────────────────────────
+const EMOTIONS = {
+  neutral: {
+    eyeColor: "#00d4ff",
+    mouth: `<path d="M72 112 Q100 118 128 112" stroke="white" stroke-width="3.5" fill="none" stroke-linecap="round"/>`,
+    chestColor: "#00d4ff",
+    eyeSize: 11,
+  },
+  happy: {
+    eyeColor: "#6bcb77",
+    mouth: `<path d="M70 108 Q100 124 130 108" stroke="#6bcb77" stroke-width="4" fill="none" stroke-linecap="round"/>`,
+    chestColor: "#6bcb77",
+    eyeSize: 12,
+  },
+  smug: {
+    eyeColor: "#ffd93d",
+    mouth: `
+      <path d="M70 108 Q100 122 130 108" stroke="#ffd93d" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M118 104 L128 108" stroke="#ffd93d" stroke-width="3" stroke-linecap="round"/>`,
+    chestColor: "#ffd93d",
+    eyeSize: 10,
+  },
+  worried: {
+    eyeColor: "#ff9f43",
+    mouth: `<path d="M72 116 Q100 108 128 116" stroke="#ff9f43" stroke-width="3.5" fill="none" stroke-linecap="round"/>`,
+    chestColor: "#ff9f43",
+    eyeSize: 13,
+  },
+  angry: {
+    eyeColor: "#ff6b6b",
+    mouth: `
+      <path d="M72 118 Q100 108 128 118" stroke="#ff6b6b" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <line x1="60" y1="70" x2="80" y2="80" stroke="#ff6b6b" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="140" y1="70" x2="120" y2="80" stroke="#ff6b6b" stroke-width="3.5" stroke-linecap="round"/>`,
+    chestColor: "#ff6b6b",
+    eyeSize: 11,
+  },
+};
+
+function setEmotion(emotion) {
+  const e = EMOTIONS[emotion] || EMOTIONS.neutral;
+  document.getElementById("eye-l-inner").setAttribute("r", e.eyeSize);
+  document.getElementById("eye-r-inner").setAttribute("r", e.eyeSize);
+  document.getElementById("eye-l-inner").setAttribute("fill", e.eyeColor);
+  document.getElementById("eye-r-inner").setAttribute("fill", e.eyeColor);
+  document.getElementById("robot-mouth").innerHTML = e.mouth;
+  document.getElementById("chest-light").setAttribute("fill", e.chestColor);
+
+  const svg = document.getElementById("robot-svg");
+  svg.classList.remove("winning","losing");
+  if (["ecstatic","happy"].includes(emotion)) svg.classList.add("winning");
+  if (["sad","devastated"].includes(emotion)) svg.classList.add("losing");
+
+  const badge = document.getElementById("emotion-badge");
+  badge.textContent = emotion.toUpperCase();
+  badge.style.background = `rgba(0,0,0,0.2)`;
+  badge.style.borderColor = e.eyeColor;
+  badge.style.color = e.eyeColor;
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let counting = false;
+
+// ── Webcam poll ───────────────────────────────────────────────────────────────
+async function pollFrame() {
+  try {
+    const r = await fetch("/api/frame");
+    const d = await r.json();
+    if (d.frame) {
+      document.getElementById("webcam-img").src = "data:image/jpeg;base64," + d.frame;
+    }
+    const gl = document.getElementById("gesture-label");
+    if (d.gesture) {
+      gl.textContent = MOVE_EMOJI[d.gesture] + " " + d.gesture.toUpperCase();
+    } else {
+      gl.textContent = "— show your hand —";
+    }
+  } catch(e) {}
+}
+setInterval(pollFrame, 120);
+
+// ── Countdown ─────────────────────────────────────────────────────────────────
+function countdown(seconds) {
+  return new Promise(resolve => {
+    const el = document.getElementById("countdown-display");
+    let t = seconds;
+    function tick() {
+      el.textContent = t;
+      el.classList.add("show");
+      setTimeout(() => {
+        el.classList.remove("show");
+        t--;
+        if (t > 0) setTimeout(tick, 900);
+        else setTimeout(resolve, 300);
+      }, 600);
+    }
+    tick();
+  });
+}
+
+// ── Play round ────────────────────────────────────────────────────────────────
+document.getElementById("play-btn").addEventListener("click", async () => {
+  if (counting) return;
+  counting = true;
+  const playBtn = document.getElementById("play-btn");
+  playBtn.disabled = true;
+  playBtn.textContent = "⏳ Get ready…";
+
+  await countdown(3);
+
+  // Snapshot
+  const res = await fetch("/api/play", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ move: "auto" }),
+  });
+  const data = await res.json();
+  counting = false;
+
+  if (data.error) {
+    playBtn.disabled = false;
+    playBtn.textContent = "▶ Play Round (3-2-1…)";
+    document.getElementById("result-banner").textContent = "⚠️ " + data.error;
+    document.getElementById("result-banner").className = "";
+    return;
+  }
+
+  // Update UI
+  updateState(data);
+
+  if (data.game_over) {
+    setTimeout(() => showGameOver(data), 800);
+  } else {
+    playBtn.disabled = false;
+    playBtn.textContent = "▶ Play Round (3-2-1…)";
+  }
+});
+
+function updateState(data) {
+  document.getElementById("player-score").textContent = data.player_score;
+  document.getElementById("robot-score").textContent  = data.robot_score;
+  document.getElementById("round-display").textContent = (data.game_over ? data.round : data.round) + " / 21";
+  setEmotion(data.emotion);
+
+  // Robot move
+  const rmd = document.getElementById("robot-move-display");
+  rmd.textContent = MOVE_EMOJI[data.robot_move] || "❓";
+  rmd.style.transform = "scale(1.4)";
+  setTimeout(() => rmd.style.transform = "", 300);
+
+  // Excite robot briefly
+  const wrap = document.getElementById("robot-wrap");
+  wrap.classList.add("excited");
+  setTimeout(() => wrap.classList.remove("excited"), 2000);
+
+  // Result banner
+  const banner = document.getElementById("result-banner");
+  if (data.result === "player") {
+    banner.textContent = "🎉 You Win!";
+    banner.className = "win";
+  } else if (data.result === "robot") {
+    banner.textContent = "🤖 R.O.B. Wins!";
+    banner.className = "lose";
+  } else {
+    banner.textContent = "🤝 Tie!";
+    banner.className = "tie";
+  }
+
+  // History row
+  const list = document.getElementById("history-list");
+  const row = document.createElement("div");
+  row.className = "history-row";
+  const cls = data.result === "player" ? "win" : data.result === "robot" ? "lose" : "tie";
+  const label = data.result === "player" ? "WIN" : data.result === "robot" ? "LOSE" : "TIE";
+  row.innerHTML = `
+    <span class="h-round">#${data.round}</span>
+    <span class="h-move">${MOVE_EMOJI[data.player_move]} ${data.player_move}</span>
+    <span class="h-vs">vs</span>
+    <span class="h-robot">${MOVE_EMOJI[data.robot_move]} ${data.robot_move}</span>
+    <span class="h-result ${cls}">${label}</span>
+  `;
+  list.insertBefore(row, list.firstChild);
+}
+
+// ── Game Over ─────────────────────────────────────────────────────────────────
+function showGameOver(data) {
+  const overlay = document.getElementById("gameover-overlay");
+  const title   = document.getElementById("gameover-title");
+  const emoji   = document.getElementById("gameover-emoji");
+  const scores  = document.getElementById("gameover-scores");
+
+  if (data.winner === "player") {
+    emoji.textContent = "🏆";
+    title.textContent = "You Win!";
+    title.className = "gameover-title player-wins";
+  } else if (data.winner === "robot") {
+    emoji.textContent = "🤖";
+    title.textContent = "R.O.B. Wins!";
+    title.className = "gameover-title robot-wins";
+  } else {
+    emoji.textContent = "🤝";
+    title.textContent = "It's a Tie!";
+    title.className = "gameover-title tie";
+  }
+
+  scores.innerHTML = `You <span>${data.player_score}</span> — <span>${data.robot_score}</span> R.O.B.`;
+  overlay.classList.add("show");
+}
+
+// ── Reset ─────────────────────────────────────────────────────────────────────
+async function resetGame() {
+  await fetch("/api/reset", { method: "POST" });
+  document.getElementById("player-score").textContent = "0";
+  document.getElementById("robot-score").textContent  = "0";
+  document.getElementById("round-display").textContent = "1 / 21";
+  document.getElementById("result-banner").textContent = "— —";
+  document.getElementById("result-banner").className   = "";
+  document.getElementById("robot-move-display").textContent = "";
+  document.getElementById("gesture-label").textContent = "— show your hand —";
+  document.getElementById("history-list").innerHTML    = "";
+  document.getElementById("gameover-overlay").classList.remove("show");
+  document.getElementById("play-btn").disabled = false;
+  document.getElementById("play-btn").textContent = "▶ Play Round (3-2-1…)";
+  setEmotion("neutral");
+}
+
+document.getElementById("reset-btn").addEventListener("click", resetGame);
+document.getElementById("gameover-reset").addEventListener("click", resetGame);
+
+// Initial emotion
+setEmotion("neutral");
+</script>
+</body>
 </html>
