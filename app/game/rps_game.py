@@ -40,6 +40,7 @@ class RPSGame():
         self.robot_move = None
         self.result = None
         self.winner = None
+        self.prev_result = None
 
         self.player_score = 0
         self.robot_score = 0
@@ -69,10 +70,13 @@ class RPSGame():
 
         if self.result == "player":
             self.player_score += 1
-            self.rounds_played += 1
         elif self.result == "robot":
             self.robot_score += 1
+
+        if self.prev_result != "tie":
             self.rounds_played += 1
+        
+        self.prev_result = self.result
         
         round_data = {
             "round": self.rounds_played,
