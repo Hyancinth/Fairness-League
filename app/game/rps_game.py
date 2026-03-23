@@ -116,11 +116,11 @@ class RPSGame():
         
         if score_diff >= 3:
             return "ecstatic"
-        elif score_diff > 0:
+        elif score_diff > 0 and score_diff < 3:
             return "happy"
         elif score_diff == 0:
             return "neutral"
-        elif score_diff < 0:
+        elif score_diff < 0 and score_diff > -3:
             return "sad"
         elif score_diff <= -3:
             return "devastated"

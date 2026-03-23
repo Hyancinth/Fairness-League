@@ -671,7 +671,7 @@ document.getElementById("play-btn").addEventListener("click", async () => {
 function updateState(data) {
   document.getElementById("player-score").textContent = data.player_score;
   document.getElementById("robot-score").textContent  = data.robot_score;
-  document.getElementById("round-display").textContent = (data.game_over ? data.round : data.round) + " / 21";
+  document.getElementById("round-display").textContent = (data.game_over ? data.round : data.round) + " / 11";
   setEmotion(data.emotion);
 
   // Robot move
