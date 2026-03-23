@@ -10,6 +10,7 @@ class GestureClassifier:
                 return
 
             def finger_extended(tip, pip, wrist):
+                # if the fingertip is farther from the wrist than the pip, consider it extended
                 tip_to_wrist = np.linalg.norm(np.array([tip.x - wrist.x, tip.y - wrist.y, tip.z - wrist.z]))
                 pip_to_wrist = np.linalg.norm(np.array([pip.x - wrist.x, pip.y - wrist.y, pip.z - wrist.z]))
 

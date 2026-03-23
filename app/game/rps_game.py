@@ -25,7 +25,7 @@ class CopycatStrategy():
         if not history:
             return random.choice(MOVES)
         
-        last_player_move = history[-1]["player_move"] # history is a list of dicts with keys "player_move", "robot_move", "result"
+        last_player_move = history[-1]["player"]
         return last_player_move
 
 

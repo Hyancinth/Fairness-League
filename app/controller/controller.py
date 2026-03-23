@@ -25,8 +25,8 @@ class GameController:
     
     def get_frame_data(self):
         if self.latest_frame is not None:
-            _, buffer = cv2.imencode('.jpg', self.latest_frame)
-            return base64.b64encode(buffer).decode('utf-8'), self.latest_gesture 
+            _, buffer = cv2.imencode('.jpg', self.latest_frame) # encode frame as jpg
+            return base64.b64encode(buffer).decode('utf-8'), self.latest_gesture # return base64 string of the frame and the detected gesture
         
         return None
 

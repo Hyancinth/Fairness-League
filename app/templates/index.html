@@ -421,8 +421,8 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 <body>
 
 <header>
-  <h1>✊ RPS ROBOT SHOWDOWN ✌️</h1>
-  <p>21 rounds • Can you outsmart the bot?</p>
+  <h1>✊ The Faireness League ✌️</h1>
+  <p>11 rounds • How fair will you be?</p>
 </header>
 
 <main>
@@ -435,7 +435,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
     </div>
     <div class="score-divider">
       <div class="round-label">Round</div>
-      <div class="round-val" id="round-display">1 / 21</div>
+      <div class="round-val" id="round-display">1 / 11</div>
     </div>
     <div class="score-side robot">
       <div class="score-label">R.O.B.</div>
@@ -538,15 +538,17 @@ const EMOTIONS = {
   },
   ecstatic: {
     eyeColor: "#6bcb77",
-    mouth: `<path d="M70 108 Q100 124 130 108" stroke="#6bcb77" stroke-width="4" fill="none" stroke-linecap="round"/>`,
+    mouth: `
+      <path d="M65 105 Q100 128 135 105" stroke="#6bcb77" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="68" cy="100" rx="8" ry="5" fill="#ff6b6b" opacity="0.3"/>
+      <ellipse cx="132" cy="100" rx="8" ry="5" fill="#ff6b6b" opacity="0.3"/>`,
     chestColor: "#6bcb77",
-    eyeSize: 12,
+    eyeSize: 14,
   },
   happy: {
     eyeColor: "#ffd93d",
     mouth: `
-      <path d="M70 108 Q100 122 130 108" stroke="#ffd93d" stroke-width="4" fill="none" stroke-linecap="round"/>
-      <path d="M118 104 L128 108" stroke="#ffd93d" stroke-width="3" stroke-linecap="round"/>`,
+      <path d="M70 108 Q100 122 130 108" stroke="#ffd93d" stroke-width="4" fill="none" stroke-linecap="round"/>`,
     chestColor: "#ffd93d",
     eyeSize: 10,
   },
