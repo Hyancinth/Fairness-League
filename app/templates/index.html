@@ -534,7 +534,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
     <h1>✊ The Faireness League ✌️</h1>
     <button id="info-btn" title="Game Rules">ⓘ</button>
   </div>
-  <p>21 rounds • How fair will you be?</p>
+  <p>11 rounds • How fair will you be?</p>
 </header>
 
 <main>
@@ -547,7 +547,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
     </div>
     <div class="score-divider">
       <div class="round-label">Round</div>
-      <div class="round-val" id="round-display">1 / 21</div>
+      <div class="round-val" id="round-display">1 / 11</div>
     </div>
     <div class="score-side robot">
       <div class="score-label">R.O.B.</div>
@@ -643,11 +643,11 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 
     <h3>🎮 Game Rules</h3>
     <ul>
-      <li><span class="emoji">🔢</span> Play 21 rounds of Rock Paper Scissors against R.O.B.</li>
+      <li><span class="emoji">🔢</span> Play 11 rounds of Rock Paper Scissors against R.O.B.</li>
       <li><span class="emoji">📷</span> Show your hand gesture to the webcam, then click <strong>Play Round</strong>.</li>
       <li><span class="emoji">⏱️</span> A 3-2-1 countdown will play — hold your gesture steady!</li>
       <li><span class="emoji">🤝</span> Ties don't count as a round — you'll replay until there's a winner.</li>
-      <li><span class="emoji">🏆</span> The player with the most wins after 21 rounds takes the game!</li>
+      <li><span class="emoji">🏆</span> The player with the most wins after 11 rounds takes the game!</li>
     </ul>
 
     <h3>✋ Hand Gestures</h3>
@@ -819,7 +819,7 @@ document.getElementById("play-btn").addEventListener("click", async () => {
 function updateState(data) {
   document.getElementById("player-score").textContent = data.player_score;
   document.getElementById("robot-score").textContent  = data.robot_score;
-  document.getElementById("round-display").textContent = (data.game_over ? data.round : data.round) + " / 21";
+  document.getElementById("round-display").textContent = (data.game_over ? data.round : data.round) + " / 11";
   setEmotion(data.emotion);
 
   // Robot move
@@ -892,7 +892,7 @@ async function resetGame() {
   await fetch("/api/reset", { method: "POST" });
   document.getElementById("player-score").textContent = "0";
   document.getElementById("robot-score").textContent  = "0";
-  document.getElementById("round-display").textContent = "1 / 21";
+  document.getElementById("round-display").textContent = "1 / 11";
 
   document.getElementById("result-banner").textContent = "— —";
   document.getElementById("result-banner").className   = "";

@@ -28,6 +28,33 @@ class CopycatStrategy():
         last_player_move = history[-1]["player"]
         return last_player_move
 
+class StudyRandomStrategy():
+    """
+    Fixed random sequence for study purpose
+    """
+    def select_move(self, round_number):
+        moves = [
+            "paper", "scissors", "rock", "rock", "paper", "scissors", "paper", 
+            "rock", "rock", "scissors", "paper", "rock", "scissors", "rock", 
+            "paper", "paper", "paper", "scissors", "paper", "paper", "paper", 
+        ]
+
+        return moves[round_number % len(moves)]
+
+class StudyWarmupStrategy():
+    def select_move(self, round_number):
+        moves = [
+            "rock", "paper", "paper", "scissors"
+        ]
+
+        return moves[round_number % len(moves)]
+
+class StudyFixedStrategy():
+    def __init__(self):
+        self.fixed_move = "rock"
+    
+    def select_move(self, history):
+        return self.fixed_move
 
 class RPSGame():
     def __init__(self):
@@ -46,11 +73,12 @@ class RPSGame():
         self.robot_score = 0
 
         self.rounds_played = 0
-        self.max_rounds = 21
+        self.max_rounds = 11
         self.warmup_rounds = 4
 
-        self.warmup_strategy = RandomStrategy()
-        self.strategy = random.choice([RandomStrategy(), FixedStrategy(), CopycatStrategy()])
+        self.warmup_strategy = StudyWarmupStrategy()
+        self.strategy = random.choice([StudyRandomStrategy(), StudyFixedStrategy(), CopycatStrategy()])
+        print(f"Selected main strategy: {self.strategy.__class__.__name__}")
 
         self.game_over = False
     
