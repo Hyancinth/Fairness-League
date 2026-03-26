@@ -9,19 +9,19 @@ BEATS = {
     "scissors": "paper"
 }
 
-class RandomStrategy():
-    def select_move(self, history):
-        return random.choice(MOVES)
+# class RandomStrategy():
+#     def select_move(self, history):
+#         return random.choice(MOVES)
 
-class FixedStrategy():
-    def __init__(self):
-        self.fixed_move = random.choice(MOVES)
+# class FixedStrategy():
+#     def __init__(self):
+#         self.fixed_move = random.choice(MOVES)
     
-    def select_move(self, history):
-        return self.fixed_move
+#     def select_move(self, history):
+#         return self.fixed_move
 
 class CopycatStrategy():
-    def select_move(self, history):
+    def select_move(self, history, round_number):
         if not history:
             return random.choice(MOVES)
         
@@ -32,17 +32,17 @@ class StudyRandomStrategy():
     """
     Fixed random sequence for study purpose
     """
-    def select_move(self, round_number):
+    def select_move(self, history, round_number):
         moves = [
             "paper", "scissors", "rock", "rock", "paper", "scissors", "paper", 
             "rock", "rock", "scissors", "paper", "rock", "scissors", "rock", 
             "paper", "paper", "paper", "scissors", "paper", "paper", "paper", 
         ]
 
-        return moves[round_number % len(moves)]
+        return moves[(round_number - 4) % len(moves)]
 
 class StudyWarmupStrategy():
-    def select_move(self, round_number):
+    def select_move(self, history, round_number):
         moves = [
             "rock", "paper", "paper", "scissors"
         ]
@@ -53,7 +53,7 @@ class StudyFixedStrategy():
     def __init__(self):
         self.fixed_move = "rock"
     
-    def select_move(self, history):
+    def select_move(self, history, round_number):
         return self.fixed_move
 
 class RPSGame():
@@ -77,7 +77,7 @@ class RPSGame():
         self.warmup_rounds = 4
 
         self.warmup_strategy = StudyWarmupStrategy()
-        self.strategy = random.choice([StudyRandomStrategy(), StudyFixedStrategy(), CopycatStrategy()])
+        self.strategy = StudyRandomStrategy() # Change this to switch which strategy the robot uses after warmup
         print(f"Selected main strategy: {self.strategy.__class__.__name__}")
 
         self.game_over = False
@@ -130,7 +130,7 @@ class RPSGame():
  
     def process_player_move(self, gesture):
         self.player_move = gesture if gesture in MOVES else None
-        self.robot_move = self.pick_strategy().select_move(self.history)
+        self.robot_move = self.pick_strategy().select_move(self.history, self.rounds_played)
         
         if self.player_move == self.robot_move:
             self.result = "tie"
