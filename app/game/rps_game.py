@@ -99,7 +99,7 @@ class RPSGame():
                 self.winner = "tie"
 
         return round_data
-
+ 
     def process_player_move(self, gesture):
         self.player_move = gesture if gesture in MOVES else None
         self.robot_move = self.pick_strategy().select_move(self.history)

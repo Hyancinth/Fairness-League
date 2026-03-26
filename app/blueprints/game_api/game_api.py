@@ -12,7 +12,11 @@ def frame():
     if frame is not None:
         singletons.controller.process_frame(frame)
 
-    frame_base64, gesture = singletons.controller.get_frame_data() # returns base64 string of the frame and the detected gesture
+    result = singletons.controller.get_frame_data()
+    if result is None:
+        return jsonify({"frame": None, "gesture": None})
+    
+    frame_base64, gesture = result
     return jsonify({"frame": frame_base64, "gesture": gesture})
 
 @game_api.route('/play', methods=['POST'])

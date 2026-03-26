@@ -18,10 +18,24 @@ class GameController:
         self.detector.detect(frame)
         landmarks = self.detector.result
 
-        if landmarks:
+        if landmarks and landmarks.hand_landmarks:
+            hand = landmarks.hand_landmarks[0]
+            h, w, _ = frame.shape
+            
+            # Draw bounding box around detected hand
+            x_coords = [lm.x for lm in hand]
+            y_coords = [lm.y for lm in hand]
+            x_min = max(0, int(min(x_coords) * w) - 20)
+            y_min = max(0, int(min(y_coords) * h) - 20)
+            x_max = min(w, int(max(x_coords) * w) + 20)
+            y_max = min(h, int(max(y_coords) * h) + 20)
+            cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (255, 212, 0), 2)
+            
             gesture = self.classifier.classify_gesture(landmarks)
             if gesture:
                 self.latest_gesture = gesture.lower()
+        else:
+            self.latest_gesture = None
     
     def get_frame_data(self):
         if self.latest_frame is not None:
