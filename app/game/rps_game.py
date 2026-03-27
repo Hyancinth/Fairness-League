@@ -77,7 +77,7 @@ class RPSGame():
         self.warmup_rounds = 4
 
         self.warmup_strategy = StudyWarmupStrategy()
-        self.strategy = StudyRandomStrategy() # Change this to switch which strategy the robot uses after warmup
+        self.strategy = StudyFixedStrategy() # Change this to switch which strategy the robot uses after warmup
         print(f"Selected main strategy: {self.strategy.__class__.__name__}")
 
         self.game_over = False
@@ -101,7 +101,9 @@ class RPSGame():
         elif self.result == "robot":
             self.robot_score += 1
 
-        if self.prev_result != "tie":
+        history_round = self.rounds_played + 1
+        # Only count the round if it wasn't a tie
+        if self.result != "tie":
             self.rounds_played += 1
         
         self.prev_result = self.result
@@ -113,11 +115,13 @@ class RPSGame():
             "result": self.result,
             "player_score": self.player_score,
             "robot_score": self.robot_score,
+            "history_round": history_round,
         }
 
         self.history.append(round_data)
 
-        if self.rounds_played >= self.max_rounds:
+        # Only check for game over on a non tie round
+        if self.result != "tie" and self.rounds_played >= self.max_rounds:
             self.game_over = True
             if self.player_score > self.robot_score:
                 self.winner = "player"
