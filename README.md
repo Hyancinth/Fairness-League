@@ -163,16 +163,12 @@ The server exposes a small REST API under `/api`:
 
 Contributions are welcome! Please open an issue or pull request on GitHub.
 
-A few areas that would benefit from help:
-
-- Additional AI strategies for R.O.B.
-- Playtesting and balance feedback
-- Accessibility improvements to the UI
-- Unit tests for the game logic
+Next steps:
+- Deploy application to production. 
+- Look to integrate a 3D printed robot arm to also physically play in addition to the web app. 
 
 ---
 
 ## Support
 
 - **Bug reports & feature requests:** [GitHub Issues](https://github.com/Hyancinth/Fairness-League/issues)
-- **Project walkthrough & deep-dive:** [walkthrough.md](walkthrough.md)
