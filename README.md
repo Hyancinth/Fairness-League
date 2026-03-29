@@ -48,13 +48,6 @@ cd Fairness-League
 pip install -r requirements.txt
 ```
 
-> **Tip:** Use a virtual environment to keep dependencies isolated:
-> ```bash
-> python -m venv .venv
-> source .venv/bin/activate   # Windows: .venv\Scripts\activate
-> pip install -r requirements.txt
-> ```
-
 ### 3. Run the server
 
 ```bash
@@ -164,6 +157,8 @@ The server exposes a small REST API under `/api`:
 Contributions are welcome! Please open an issue or pull request on GitHub.
 
 Next steps:
+- Improve the FPS of the camera feed to make the gesture recognition process smoother.
+    - This will make it easier for the player to quickly switch their played move when the countdown is almost done and have the change recognized.  
 - Deploy application to production. 
 - Look to integrate a 3D printed robot arm to also physically play in addition to the web app. 
 
