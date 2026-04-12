@@ -49,7 +49,7 @@ class RPSGame():
         self.warmup_rounds = 4
 
         self.warmup_strategy = RandomStrategy()
-        self.strategy = strategy if self.strategy is not None else random.choice([RandomStrategy(), FixedStrategy(), CopycatStrategy()])
+        self.strategy = strategy if strategy is not None else random.choice([RandomStrategy(), FixedStrategy(), CopycatStrategy()])
 
         self.game_over = False
     
