@@ -14,8 +14,8 @@ class RandomStrategy():
         return random.choice(MOVES)
 
 class FixedStrategy():
-    def __init__(self):
-        self.fixed_move = random.choice(MOVES)
+    def __init__(self, move=None):
+        self.fixed_move = move if move in MOVES else random.choice(MOVES)
     
     def select_move(self, history):
         return self.fixed_move
@@ -30,10 +30,10 @@ class CopycatStrategy():
 
 
 class RPSGame():
-    def __init__(self):
-        self.reset()
+    def __init__(self, strategy = None):
+        self.reset(strategy)
     
-    def reset(self):
+    def reset(self, strategy=None):
         self.history = []
 
         self.player_move = None
@@ -49,7 +49,7 @@ class RPSGame():
         self.warmup_rounds = 4
 
         self.warmup_strategy = RandomStrategy()
-        self.strategy = random.choice([RandomStrategy(), FixedStrategy(), CopycatStrategy()])
+        self.strategy = strategy if self.strategy is not None else random.choice([RandomStrategy(), FixedStrategy(), CopycatStrategy()])
 
         self.game_over = False
     
@@ -65,7 +65,8 @@ class RPSGame():
         if gesture not in MOVES:
             return {"error": "Invalid move"}
         
-        self.process_player_move(gesture)
+        robot_move = self.pick_strategy().select_move(self.history)
+        self.result = self.get_round_result(gesture, robot_move)
 
         if self.result == "player":
             self.player_score += 1
@@ -88,27 +89,38 @@ class RPSGame():
 
         if self.result != "tie" and self.rounds_played >= self.max_rounds:
             self.game_over = True
-            if self.player_score > self.robot_score:
-                self.winner = "player"
-            elif self.robot_score > self.player_score:
-                self.winner = "robot"
+            self.winner = self.determine_winner()
 
         return round_data
  
-    def process_player_move(self, gesture):
+    def get_round_result(self, gesture, robot_move):
         self.player_move = gesture if gesture in MOVES else None
-        self.robot_move = self.pick_strategy().select_move(self.history)
+        self.robot_move = robot_move if robot_move in MOVES else None
         
         if self.player_move == self.robot_move:
-            self.result = "tie"
+            return "tie"
         elif BEATS[self.player_move] == self.robot_move:
-            self.result = "player"
+            return "player"
         else:
-            self.result = "robot"
+            return "robot"
+    
+    def determine_winner(self, player_score=None, robot_score=None):
+        if player_score is None:
+            player_score = self.player_score
+        if robot_score is None:
+            robot_score = self.robot_score
+
+        if player_score > robot_score:
+            return "player"
+        elif robot_score > player_score:
+            return "robot"
+        else:
+            return "tie"
         
-    def get_robot_emotion(self):
-        score_diff = self.robot_score - self.player_score
-        
+    def get_robot_emotion(self, score_diff=None):
+        if score_diff is None:
+            score_diff = self.robot_score - self.player_score
+
         if score_diff >= 3:
             return "ecstatic"
         elif score_diff > 0 and score_diff < 3:
